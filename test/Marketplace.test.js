@@ -1,3 +1,5 @@
+const { assert } = require('chai');
+
 const Marketplace = artifacts.require("Marketplace");
 
 require('chai')
@@ -54,8 +56,14 @@ contract('Marketplace',([deployer,seller,buyer])=>{
         })
 
         it('Sell products',async()=>{
+
+            let price = await web3.utils.toWei('1','Ether');
+            // Get Seller old balance 
+            let oldSellerBalance = await web3.eth.getBalance(seller);
+            oldSellerBalance = new web3.utils.BN(oldSellerBalance)
+
             // Make purchase
-            const result = await marketplace.purchaseProduct(productCount,{from:buyer,value:web3.utils.toWei('1','Ether')});
+            const result = await marketplace.purchaseProduct(productCount,{from:buyer,value:price});
 
             // Check logs 
             const event = result.logs[0].args; 
@@ -64,9 +72,16 @@ contract('Marketplace',([deployer,seller,buyer])=>{
             assert.equal(event.price,web3.utils.toWei('1','Ether'))
             assert.equal(event.owner,buyer)
             assert.equal(event.purchased, true)
+            price = new web3.utils.BN(price);
+
+            // check sellers new balance
+            let newSellerBalance = await web3.eth.getBalance(seller);
+            newSellerBalance = new web3.utils.BN(newSellerBalance);
+
+            let expectedBalance = oldSellerBalance.add(price);
 
             // Check if seller recieved funds
-
+            assert.equal(newSellerBalance.toString(),expectedBalance.toString())
         })
     })
 })
