@@ -53,15 +53,28 @@ contract Marketplace {
     function purchaseProduct(uint _id) public payable {
         // Fetch Product 
         Product memory _product = products[_id];
-        // Fetch Owner 
+
+         // Fetch Owner 
         address payable _seller = _product.owner;
-        // Make sure purchase is valid 
+
+        // Make sure the product has valid id 
+        require(_product.id > 0 && _product.id <= productCount);
+
+        // Require that there is enough ether in transaction 
+        require(msg.value >= _product.price);
+
+        require(!_product.purchased);
+
+        require(_seller != payable(msg.sender));    
+
         // Transfer ownership to the buyer 
         _product.owner = payable(msg.sender);
         _product.purchased = true;
         products[_id] = _product;
+
         // Pay the seller by sending them ether
         payable(_seller).transfer(msg.value);
+
         // Trigger Event 
         emit ProductPurchased(productCount,_product.name,_product.price,payable(msg.sender),true);
 

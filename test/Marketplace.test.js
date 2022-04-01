@@ -43,6 +43,8 @@ contract('Marketplace',([deployer,seller,buyer])=>{
 
             // Failure: Product must have name 
             await marketplace.createProduct('',web3.utils.toWei('1','Ether'),{from:seller}).should.be.rejected;
+
+            // FAILURE: Product must have price 
             await marketplace.createProduct('Iphone x',0,{from:seller}).should.be.rejected;
 
         })
@@ -77,11 +79,22 @@ contract('Marketplace',([deployer,seller,buyer])=>{
             // check sellers new balance
             let newSellerBalance = await web3.eth.getBalance(seller);
             newSellerBalance = new web3.utils.BN(newSellerBalance);
-
             let expectedBalance = oldSellerBalance.add(price);
 
             // Check if seller recieved funds
             assert.equal(newSellerBalance.toString(),expectedBalance.toString())
-        })
+
+            // FAILURE : Tries to buy product that does not exist 
+             await marketplace.purchaseProduct(99,{from:buyer,value:price}).should.be.rejected;
+            
+             // FAILURE: Buyer tries to buy without enough ether 
+             await marketplace.purchaseProduct(productCount,{from:buyer,value:web3.utils.toWei('0.5','Ether')}).should.be.rejected;
+
+            //  FAILURE: Deployer tries to buy the product
+             await marketplace.purchaseProduct(productCount,{from:deployer,value:web3.utils.toWei('1','Ether')}).should.be.rejected;
+           
+             //  FAILURE: Buyer tries to buy again 
+             await marketplace.purchaseProduct(productCount,{from:seller,value:web3.utils.toWei('1','Ether')}).should.be.rejected;
+        })  
     })
 })
