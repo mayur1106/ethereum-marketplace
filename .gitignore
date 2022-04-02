@@ -11,6 +11,8 @@
 # production
 /build
 /src/abis
+/frontend/src/abis
+/frontend/node_modules
 
 # misc
 .DS_Store
