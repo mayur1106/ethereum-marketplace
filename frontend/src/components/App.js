@@ -19,7 +19,9 @@ class App extends Component {
       window.web3 = new Web3(window.ethereum)
       try {
         const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+        console.log(accounts);
       } catch (error) {
+        window.alert('Non-Ethereum browser detected. You should consider trying MetaMask!')
         if (error.code === 4001) {
           // User rejected request
         }
